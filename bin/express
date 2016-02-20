@@ -75,7 +75,7 @@ function confirm(msg, callback) {
  */
 
 function createApplication(app_name, path) {
-  var wait = 5;
+  var wait = 6;
 
   console.log();
   function complete() {
@@ -101,7 +101,7 @@ function createApplication(app_name, path) {
   var app = loadTemplate('js/app.js');
   var www = loadTemplate('js/www');
   var index = loadTemplate('js/routes/index.js');
-  var users = loadTemplate('js/routes/users.js');
+  var api = loadTemplate('js/routes/api/index.js');
 
   // CSS
   var css = loadTemplate('css/style.css');
@@ -136,9 +136,14 @@ function createApplication(app_name, path) {
 
     mkdir(path + '/routes', function(){
       write(path + '/routes/index.js', index);
-      write(path + '/routes/users.js', users);
       complete();
     });
+
+    mkdir(path + '/routes/api', function() {
+      write(path + '/routes/api/index.js', api);
+      complete();
+    });
+
 
     mkdir(path + '/views', function(){
       switch (program.template) {
