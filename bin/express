@@ -75,7 +75,7 @@ function confirm(msg, callback) {
  */
 
 function createApplication(app_name, path) {
-  var wait = 6;
+  var wait = 7;
 
   console.log();
   function complete() {
@@ -100,6 +100,7 @@ function createApplication(app_name, path) {
   // JavaScript
   var app = loadTemplate('js/app.js');
   var www = loadTemplate('js/www');
+  var dbConfig = loadTemplate('js/config/database.js');
   var index = loadTemplate('js/routes/index.js');
   var api = loadTemplate('js/routes/api/index.js');
 
@@ -246,6 +247,11 @@ function createApplication(app_name, path) {
     // write files
     write(path + '/package.json', JSON.stringify(pkg, null, 2));
     write(path + '/app.js', app);
+    mkdir(path + '/config', function() {
+      dbConfig = dbConfig.replace(/{name}/g, app_name);
+      write(path + '/config/database.js', dbConfig);
+      complete();
+    });
     mkdir(path + '/bin', function(){
       www = www.replace('{name}', app_name);
       write(path + '/bin/www', www, 0755);
