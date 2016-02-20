@@ -104,6 +104,7 @@ function createApplication(app_name, path) {
   var index = loadTemplate('js/routes/index.js');
   var api = loadTemplate('js/routes/api/index.js');
   var user = loadTemplate('js/models/user.js');
+  var passport = loadTemplate('js/config/passport.js');
 
   // CSS
   var css = loadTemplate('css/style.css');
@@ -157,6 +158,8 @@ function createApplication(app_name, path) {
         case 'ejs':
           copy_template('ejs/index.ejs', path + '/views/index.ejs');
           copy_template('ejs/error.ejs', path + '/views/error.ejs');
+          copy_template('ejs/login.ejs', path + '/views/login.ejs');
+          copy_template('ejs/signup.ejs', path + '/views/signup.ejs');
           break;
         case 'jade':
           copy_template('jade/index.jade', path + '/views/index.jade');
@@ -211,7 +214,12 @@ function createApplication(app_name, path) {
           'morgan': '~1.6.1',
           'serve-favicon': '~2.3.0',
           'mongoose': '~4.4.4',
-          'bcrypt-nodejs': '~0.0.3'
+          'bcrypt-nodejs': '~0.0.3',
+          'connect-flash': '~0.1.1',
+          'express-session': '~1.13.0',
+          'connect-mongo': '~1.1.0',
+          'passport': '~0.3.2',
+          'passport-local': '~1.0.0'
       }
     }
 
@@ -257,6 +265,7 @@ function createApplication(app_name, path) {
     mkdir(path + '/config', function() {
       dbConfig = dbConfig.replace(/{name}/g, app_name);
       write(path + '/config/database.js', dbConfig);
+      write(path + '/config/passport.js', passport);
       complete();
     });
     mkdir(path + '/bin', function(){

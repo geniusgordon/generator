@@ -9,9 +9,29 @@ var mongoose = require('mongoose');
 var dbConfig = require('./config/database');
 mongoose.connect(dbConfig.url);
 
+var flash = require('connect-flash');
+var session = require('express-session');
+var passport = require('./config/passport');
+
+var MongoStore = require('connect-mongo')(session);
+var mongoStore = new MongoStore({
+    mongooseConnection: mongoose.connection
+});
+
 var routes = require('./routes');
 
 var app = express();
+
+app.use(flash());
+app.use(session({
+  secret: '{name}-secret',
+  store: mongoStore,
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
