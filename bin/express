@@ -75,7 +75,7 @@ function confirm(msg, callback) {
  */
 
 function createApplication(app_name, path) {
-  var wait = 7;
+  var wait = 8;
 
   console.log();
   function complete() {
@@ -103,6 +103,7 @@ function createApplication(app_name, path) {
   var dbConfig = loadTemplate('js/config/database.js');
   var index = loadTemplate('js/routes/index.js');
   var api = loadTemplate('js/routes/api/index.js');
+  var user = loadTemplate('js/models/user.js');
 
   // CSS
   var css = loadTemplate('css/style.css');
@@ -142,6 +143,11 @@ function createApplication(app_name, path) {
 
     mkdir(path + '/routes/api', function() {
       write(path + '/routes/api/index.js', api);
+      complete();
+    });
+
+    mkdir(path + '/models', function() {
+      write(path + '/models/user.js', user);
       complete();
     });
 
@@ -204,7 +210,8 @@ function createApplication(app_name, path) {
           'debug': '~2.2.0',
           'morgan': '~1.6.1',
           'serve-favicon': '~2.3.0',
-          'mongoose': '~4.4.4'
+          'mongoose': '~4.4.4',
+          'bcrypt-nodejs': '~0.0.3'
       }
     }
 
