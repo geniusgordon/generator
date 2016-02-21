@@ -1,6 +1,8 @@
-var router = require('express')();
+var express = require('express');
 var api = require('./api');
 var passport = require('../config/passport');
+
+var router = express.Router();
 
 router.use('/api', api);
 
