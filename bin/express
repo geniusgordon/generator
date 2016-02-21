@@ -33,6 +33,7 @@ program
   .option('-c, --css <engine>', 'add stylesheet <engine> support (less|stylus|compass|sass) (defaults to plain css)')
   .option('    --git', 'add .gitignore')
   .option('-f, --force', 'force on non-empty directory')
+  .option('-s, --socket', 'add socket.io')
   .parse(process.argv);
 
 if (!exit.exited) {
@@ -75,7 +76,7 @@ function confirm(msg, callback) {
  */
 
 function createApplication(app_name, path) {
-  var wait = 8;
+  var wait = 9;
 
   console.log();
   function complete() {
@@ -105,6 +106,7 @@ function createApplication(app_name, path) {
   var api = loadTemplate('js/routes/api/index.js');
   var user = loadTemplate('js/models/user.js');
   var passport = loadTemplate('js/config/passport.js');
+  var socketConfig = loadTemplate('js/config/socket.js');
 
   // CSS
   var css = loadTemplate('css/style.css');
@@ -156,7 +158,10 @@ function createApplication(app_name, path) {
     mkdir(path + '/views', function(){
       switch (program.template) {
         case 'ejs':
-          copy_template('ejs/index.ejs', path + '/views/index.ejs');
+          if (program.socket)
+            copy_template('ejs/index-socket.ejs', path + '/views/index.ejs');
+          else
+            copy_template('ejs/index.ejs', path + '/views/index.ejs');
           copy_template('ejs/error.ejs', path + '/views/error.ejs');
           copy_template('ejs/login.ejs', path + '/views/login.ejs');
           copy_template('ejs/signup.ejs', path + '/views/signup.ejs');
@@ -199,6 +204,35 @@ function createApplication(app_name, path) {
 
     // Template support
     app = app.replace('{views}', program.template);
+
+    // Config files
+    mkdir(path + '/config', function() {
+      dbConfig = dbConfig.replace(/{name}/g, app_name);
+      write(path + '/config/database.js', dbConfig);
+      write(path + '/config/passport.js', passport);
+
+      if (program.socket) {
+        socketConfig = socketConfig.replace('{name}' + app_name);
+        write(path + '/config/socket.js', socketConfig);
+      }
+
+      complete();
+    });
+
+    // Socket.io support
+    if (program.socket) {
+      app = app.replace('{socket}', eol + 'app.io = require(\'./socket\')(mongoStore);\nrequire(\'./routes/socket\')(app.io);');
+      www = www.replace('{socket}', eol + 'app.io.listen(server);');
+
+      copy_template('js/socket.js', path + '/socket.js');
+      mkdir(path + '/routes/socket/', function(){
+        copy_template('js/routes/socket/index.js', path + '/routes/socket/index.js');
+        complete();
+      });
+    } else {
+      app = app.replace('{socket}', '');
+      www = www.replace('{socket}', '');
+    }
 
     // package.json
     var pkg = {
@@ -256,18 +290,18 @@ function createApplication(app_name, path) {
       default:
     }
 
+    // Socket dependency
+    if (program.socket) {
+        pkg.dependencies['socket.io'] = '~1.4.5';
+        pkg.dependencies['passport.socketio'] = '~3.6.1';
+    }
+
     // sort dependencies like npm(1)
     pkg.dependencies = sortedObject(pkg.dependencies);
 
     // write files
     write(path + '/package.json', JSON.stringify(pkg, null, 2));
     write(path + '/app.js', app);
-    mkdir(path + '/config', function() {
-      dbConfig = dbConfig.replace(/{name}/g, app_name);
-      write(path + '/config/database.js', dbConfig);
-      write(path + '/config/passport.js', passport);
-      complete();
-    });
     mkdir(path + '/bin', function(){
       www = www.replace('{name}', app_name);
       write(path + '/bin/www', www, 0755);

@@ -31,7 +31,7 @@ app.use(session({
 }));
 
 app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.session());{socket}
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
